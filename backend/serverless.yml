@@ -23,6 +23,7 @@ iamRoleStatements:
 
 functions:
 
+  # Authorizer
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
@@ -34,6 +35,7 @@ functions:
           method: get
           path: todos
           cors: true
+          authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -49,6 +51,7 @@ functions:
           method: post
           path: todos
           cors: true
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           request:
             schema:
@@ -67,6 +70,7 @@ functions:
       - http:
           method: patch
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -87,6 +91,7 @@ functions:
       - http:
           method: delete
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -108,6 +113,7 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
