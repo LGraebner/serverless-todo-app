@@ -31,13 +31,15 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         },
         body: JSON.stringify(result.Items)
     }
-  }
-
-  return {
-      statusCode: 404,
+  } else {
+    return {
+      statusCode: 200,
       headers: {
           'Access-Control-Allow-Origin': '*'
       },
-      body: ''
+      body: JSON.stringify([])
+    }
   }
+
+
 }
