@@ -23,23 +23,28 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     }
   }).promise()
 
+  let content
   if (result.Count !== 0) {
-    return {
-        statusCode: 200,
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify(result.Items)
-    }
+      content = result.Items.map(item =>  {
+        return {
+          todoId: item.todoId,
+          createdAt: item.createdAt,
+          name: item.name,
+          dueDate: item.dueDate,
+          done: item.done,
+          attachmentUrl: item.attachmentUrl
+        }
+      })
   } else {
-    return {
+      content = []
+  }
+
+  return {
       statusCode: 200,
       headers: {
           'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify([])
-    }
+      body: JSON.stringify(content)
   }
-
 
 }
