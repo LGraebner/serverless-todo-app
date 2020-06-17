@@ -2,6 +2,10 @@ import { decode } from 'jsonwebtoken'
 
 import { JwtPayload } from './JwtPayload'
 import { APIGatewayProxyEvent } from 'aws-lambda'
+import { createLogger } from '../utils/logger'
+
+
+const logger = createLogger('utils')
 
 /**
  * Parse a JWT token and return a user id
@@ -9,11 +13,13 @@ import { APIGatewayProxyEvent } from 'aws-lambda'
  * @returns a user id from the JWT token
  */
 export function parseUserId(jwtToken: string): string {
+  logger.info('parsing userId from jwtToken', {jwtToken:jwtToken})
   const decodedJwt = decode(jwtToken) as JwtPayload
   return decodedJwt.sub
 }
 
 export function getTokenFromApiGatewayEvent(event: APIGatewayProxyEvent) {
+    logger.info('fetching token from headers')
     const authorization = event.headers.Authorization
     const split = authorization.split(' ')
     const jwtToken = split[1]
@@ -21,14 +27,15 @@ export function getTokenFromApiGatewayEvent(event: APIGatewayProxyEvent) {
 }
 
 export function getUserId(event: APIGatewayProxyEvent) {
+  logger.info('parsing userId from GatewayEvent')
   try {
-  const authorization = event.headers.Authorization
-  const split = authorization.split(' ')
-  const jwtToken = split[1]
+    const authorization = event.headers.Authorization
+    const split = authorization.split(' ')
+    const jwtToken = split[1]
 
-  return parseUserId(jwtToken)
+    return parseUserId(jwtToken)
   } catch (e) {
-    console.log('error ', e)
+    logger.error('error ', { message: e })
     return 'unauthorizedUser'
   }
 }

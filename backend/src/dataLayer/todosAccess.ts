@@ -5,19 +5,27 @@ import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { v4 as uuid } from 'uuid'
 import * as Utils from '../lambda/utils'
+import { createLogger } from '../utils/logger'
+import * as winston from 'winston'
+
 
 
 export class TodoAccess {
 
     constructor(
         private readonly docClient: DocumentClient = new AWS.DynamoDB.DocumentClient(),
+        private readonly s3 = new AWS.S3({
+            signatureVersion: 'v4'
+          }),
+        private readonly logger: winston.Logger = createLogger('TodoAccess'),
         private readonly todoTable = process.env.TODO_TABLE,
         private readonly todoIdIndex = process.env.TODO_ID_INDEX,
-        private readonly bucketName = process.env.TODO_S3_BUCKET) { 
+        private readonly bucketName = process.env.TODO_S3_BUCKET,
+        private readonly urlExpiration = parseInt (process.env.SIGNED_URL_EXPIRATION, 10)) { 
     }
 
     async getAllTodoItemsForUser(userId: string): Promise<TodoItem[]> {
-        console.log('Getting all todo items')
+        this.logger.info('Getting all todo items')
 
         const result = await this.docClient.query({
             TableName: this.todoTable,
@@ -39,7 +47,7 @@ export class TodoAccess {
     }
 
     async createNewTodoItem(newTodo : CreateTodoRequest, userId: string): Promise<TodoItem> {
-        console.log(`Creating new todo item ${newTodo} for user ${userId}`)
+        this.logger.info(`Creating new todo item ${newTodo} for user ${userId}`)
 
         const itemId = uuid()
         const newItem = {
@@ -51,7 +59,7 @@ export class TodoAccess {
           ...newTodo
         }
       
-        console.log('new Item ', newItem)
+        this.logger.info('new Item ', { newItem: newItem})
       
         await this.docClient.put({
           TableName: this.todoTable,
@@ -62,7 +70,7 @@ export class TodoAccess {
     }
 
     async deleteTodoItem(todoId : string, userId: string) {
-        console.log(`Deleting todo item ${todoId} for user ${userId}`)
+        this.logger.info(`Deleting todo item ${todoId} for user ${userId}`)
         const result = await this.docClient.query({
             TableName: this.todoTable,
             IndexName: this.todoIdIndex,
@@ -88,7 +96,7 @@ export class TodoAccess {
     }
 
     async updateTodoItem(updatedTodo : UpdateTodoRequest, todoId: string, userId: string): Promise<TodoItem> {
-        console.log(`Updating todo item with ${updatedTodo} for user ${userId}`)
+        this.logger.info(`Updating todo item with ${updatedTodo} for user ${userId}`)
         const result = await this.docClient.query({
             TableName: this.todoTable,
             IndexName: this.todoIdIndex,
@@ -116,6 +124,15 @@ export class TodoAccess {
         } else {
             return null
         }
+    }
+
+    async generateUploadUrl(todoId : string): Promise<string> {
+        this.logger.info(`Generating uploadUrl for todo item ${todoId}`)
+        return this.s3.getSignedUrl('putObject', {
+            Bucket: this.bucketName,
+            Key: todoId,
+            Expires: this.urlExpiration
+          })
     }
 
 }

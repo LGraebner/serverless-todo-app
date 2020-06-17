@@ -25,3 +25,7 @@ export async function deleteTodoItem(todoId: string, jwtToken: string) {
     const userId = AuthUtils.parseUserId(jwtToken)
     await todoAccess.deleteTodoItem(todoId, userId)
 }
+
+export async function generateUploadUrl(todoId: string): Promise<string> {
+    return await todoAccess.generateUploadUrl(todoId)
+}
