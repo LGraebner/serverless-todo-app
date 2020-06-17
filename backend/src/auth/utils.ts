@@ -13,6 +13,13 @@ export function parseUserId(jwtToken: string): string {
   return decodedJwt.sub
 }
 
+export function getTokenFromApiGatewayEvent(event: APIGatewayProxyEvent) {
+    const authorization = event.headers.Authorization
+    const split = authorization.split(' ')
+    const jwtToken = split[1]
+    return jwtToken
+}
+
 export function getUserId(event: APIGatewayProxyEvent) {
   try {
   const authorization = event.headers.Authorization

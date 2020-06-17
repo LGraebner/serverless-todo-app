@@ -14,3 +14,14 @@ export function getUserId(event: APIGatewayProxyEvent): string {
 
   return parseUserId(jwtToken)
 }
+
+export function createTodoItemDto(item) {
+  return {
+    todoId: item.todoId,
+    createdAt: item.createdAt,
+    name: item.name,
+    dueDate: item.dueDate,
+    done: item.done,
+    attachmentUrl: item.attachmentUrl
+  }
+}
