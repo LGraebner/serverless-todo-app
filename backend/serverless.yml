@@ -6,6 +6,11 @@ plugins:
   - serverless-iam-roles-per-function
 
 provider:
+
+  tracing:
+    lambda: true
+    apiGateway: true
+
   name: aws
   runtime: nodejs12.x
 
@@ -108,7 +113,6 @@ functions:
           - dynamodb:DeleteItem
         Resource: 
           arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
-        
 
   # Gen Upload Url
   GenerateUploadUrl:

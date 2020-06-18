@@ -7,14 +7,19 @@ import { v4 as uuid } from 'uuid'
 import * as Utils from '../lambda/utils'
 import { createLogger } from '../utils/logger'
 import * as winston from 'winston'
+import * as AWSXRay from 'aws-xray-sdk'
 
+const XAWS = AWSXRay.captureAWS(AWS)
 
+//Workaround for Document client, see https://github.com/aws/aws-xray-sdk-node/issues/23
+const docClient1:DocumentClient = new DocumentClient()
+AWSXRay.captureAWSClient(((docClient1) as any).service)
 
 export class TodoAccess {
 
     constructor(
-        private readonly docClient: DocumentClient = new AWS.DynamoDB.DocumentClient(),
-        private readonly s3 = new AWS.S3({
+        private readonly docClient: DocumentClient = docClient1,
+        private readonly s3 = new XAWS.S3({
             signatureVersion: 'v4'
           }),
         private readonly logger: winston.Logger = createLogger('TodoAccess'),
