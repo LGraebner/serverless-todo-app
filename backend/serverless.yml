@@ -4,7 +4,7 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
-
+  - serverless-plugin-tracing
 provider:
 
   tracing:
@@ -25,6 +25,12 @@ provider:
     JSON_WEBKEY_SET_ENDPOINT: https://dev-bo9vxw93.eu.auth0.com/.well-known/jwks.json
 
 iamRoleStatements:
+  - Effect: "Allow" # xray permissions (required)
+    Action:
+      - "xray:PutTraceSegments"
+      - "xray:PutTelemetryRecords"
+    Resource:
+      - "*"
 
 functions:
 
