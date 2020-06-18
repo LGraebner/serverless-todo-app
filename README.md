@@ -14,4 +14,5 @@
 
 ## Misc
 - Middleware middy is used to add CORS to the header
+- Add distributed tracing via xray, had to workaround in code (DocumentClient not available for Capture) as well in serverless setup for missing permissions for role to add putTracingSegments on functions via using plugin for tracing 
 
