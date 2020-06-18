@@ -4,8 +4,13 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
-
+  - serverless-plugin-tracing
 provider:
+
+  tracing:
+    lambda: true
+    apiGateway: true
+
   name: aws
   runtime: nodejs12.x
 
@@ -20,6 +25,12 @@ provider:
     JSON_WEBKEY_SET_ENDPOINT: https://dev-bo9vxw93.eu.auth0.com/.well-known/jwks.json
 
 iamRoleStatements:
+  - Effect: "Allow" # xray permissions (required)
+    Action:
+      - "xray:PutTraceSegments"
+      - "xray:PutTelemetryRecords"
+    Resource:
+      - "*"
 
 functions:
 
@@ -108,7 +119,6 @@ functions:
           - dynamodb:DeleteItem
         Resource: 
           arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
-        
 
   # Gen Upload Url
   GenerateUploadUrl:
